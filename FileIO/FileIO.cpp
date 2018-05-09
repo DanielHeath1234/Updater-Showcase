@@ -25,7 +25,7 @@ int main() {
 	// Showcase of autoupdater.
 	auto Updater = new AutoUpdater(Version("1.0"),
 		"https://raw.githubusercontent.com/DanielHeath1234/AIE-AutoUpdater/master/version", 
-		"https://github.com/DanielHeath1234/AIE-AutoUpdater/archive/master.zip");
+		"https://github.com/DanielHeath1234/Updater-Showcase/archive/master.zip");
 	delete Updater;
 
 	std::fstream file;
