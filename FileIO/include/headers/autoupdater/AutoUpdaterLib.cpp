@@ -271,7 +271,7 @@ int AutoUpdater::unZipUpdate()
 		strncat_s(dirAndName, m_downloadDIR, sizeof(dirAndName));
 		strncat_s(dirAndName, filename, sizeof(dirAndName));
 		if (i == 0)
-			strncat_s(m_extractedDIR, dirAndName, sizeof(m_extractedDIR));
+			strncpy_s(m_extractedDIR, dirAndName, sizeof(m_extractedDIR));
 
 		// Check if this entry is a directory or file.
 		const size_t filename_length = strlen(filename);
