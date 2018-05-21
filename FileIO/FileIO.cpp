@@ -23,7 +23,7 @@ void takeInput(std::fstream* file) {
 int main() {
 
 	// Showcase of autoupdater.
-	auto Updater = new AutoUpdater(Version("0.0"),
+	auto Updater = new AutoUpdater(Version("1.0"),
 		"https://raw.githubusercontent.com/DanielHeath1234/AIE-AutoUpdater/master/version", 
 		"https://github.com/DanielHeath1234/Updater-Showcase/archive/master.zip");
 	delete Updater;
