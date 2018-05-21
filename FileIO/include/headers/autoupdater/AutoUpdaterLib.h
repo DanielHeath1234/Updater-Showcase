@@ -275,7 +275,7 @@ class AutoUpdater
 		Version * m_version;
 		Version *m_newVersion;
 
-		std::vector<string> *m_pathsToDelete = nullptr;
+		std::vector<string> m_pathsToDelete;
 		std::vector<Flag*>	m_flags;
 
 		char m_versionURL[MAX_URL];

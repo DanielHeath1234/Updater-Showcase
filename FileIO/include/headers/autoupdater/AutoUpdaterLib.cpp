@@ -551,7 +551,7 @@ int AutoUpdater::_RenameAndCopy(const char* path)
 	processR += ".bak";
 	fs::rename(process, processR, ec);
 	fs::copy(processR, process, ec);
-	m_pathsToDelete->push_back(processR.string());
+	m_pathsToDelete.push_back(processR.string());
 	if (ec.value() != 0)
 	{
 		m_flags.push_back(new Flag(ec.message(), I_FS_REMOVE_ERROR));
