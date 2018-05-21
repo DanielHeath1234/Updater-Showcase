@@ -2,7 +2,7 @@
 #include <fstream>
 #include <string>
 #include <vector>
-#include "include\headers\autoupdater\AutoUpdater.h"
+#include "AutoUpdaterLib.h"
 
 // c++ standard library
 

@@ -1,11 +1,5 @@
 #pragma once
 
-#ifdef AUTOUPDATER_EXPORTS
-#define AUTOUPDATER_API __declspec(dllexport)
-#else
-#define AUTOUPDATER_API __declspec(dllimport)
-#endif
-
 #include <string>
 #include <vector>
 #include <iostream>
@@ -29,6 +23,7 @@
 #define UPDATER_FWRITE_ERROR		(2)
 #define UPDATER_CURL_ERROR			(3)
 #define UPDATER_INVALID_INPUT		(4)
+#define UPDATER_DIRECTORY_EXCEPTION	(5)
 
 // 0 Version Number Errors. - Handles version number type and downloadVersionNumber() function.
 #define VN_SUCCESS					(UPDATER_SUCCESS)
@@ -76,26 +71,31 @@ namespace fs = std::experimental::filesystem;
 using std::string;
 using std::exception;
 
-struct AUTOUPDATER_API Flag
+struct Flag
 {
 public:
 
-	Flag(fs::path* path, const string* message, int updater_error = UPDATER_ERROR)
+	Flag(fs::path* path, const string message, int updater_error = UPDATER_ERROR)
 		: m_filePath(path), m_message(message), m_error(updater_error), m_hasPath(true)
 	{
 
 	}
-	Flag(string* path, const string* message, int updater_error = UPDATER_ERROR)
+	Flag(string* path, const string message, int updater_error = UPDATER_ERROR)
 		: m_filePath((fs::path*)path), m_message(message), m_error(updater_error), m_hasPath(true)
 	{
-		
+
 	}
-	Flag(const string* message, int updater_error)
+	Flag(const string message, int updater_error)
 		: m_message(message), m_error(updater_error), m_hasPath(false)
 	{
-		
+
 	}
-	~Flag() 
+	Flag(const char* message, int updater_error)
+		: m_error(updater_error), m_hasPath(false)
+	{
+		m_message = (message);
+	}
+	~Flag()
 	{
 
 	}
@@ -103,24 +103,24 @@ public:
 	inline const fs::path *getFilePath() const { return m_filePath; }
 	inline fs::path getFileName() { return m_filePath->filename(); }
 	inline fs::path getFileExtension() { return m_filePath->extension(); }
-	inline const string *getMessage() const { return m_message; }
+	inline const string getMessage() const { return m_message; }
 	inline int getError() { return m_error; }
 	inline bool hasPath() { return m_hasPath; }
 
 	inline void setFilePath(fs::path *path) { m_filePath = path; }
-	inline void setMessage(string *message) { m_message = message; }
+	inline void setMessage(string message) { m_message = message; }
 	inline void setError(int error) { m_error = error; }
 
 private:
 
 	fs::path *m_filePath;
-	const string *m_message;
+	string m_message;
 	int m_error;
 	bool m_hasPath = true;
 
 };
 
-struct AUTOUPDATER_API Version
+struct Version
 {
 public:
 	Version(int a_major, int a_minor, char *a_revision)
@@ -161,24 +161,24 @@ public:
 				minor = -1;
 			}
 		}
-		catch (errno_t error)
+		catch (int error)
 		{
 			m_error = error;
 		}
 		catch (exception e)
 		{
 			m_error = VN_EXCEPTION;
-			std::cout << "Exception Thrown: " << e.what() << std::endl;
+			std::cout << "Exception Thrown in Version String Constructor: " << e.what() << std::endl;
 		}
 	}
 
 	~Version()
 	{
-		
+
 	}
 
-	string getVersionString() 
-	{ 
+	string getVersionString()
+	{
 		try
 		{
 			if (revision[0] == '\0')
@@ -223,7 +223,7 @@ public:
 			if (strcmp(revision, v.revision) > 0)
 			{
 				return true;
-			}			
+			}
 		}
 		return false;
 	}
@@ -249,43 +249,43 @@ private:
 	errno_t m_error;
 };
 
-class AUTOUPDATER_API AutoUpdater
-{
-public:
-	AutoUpdater(Version cur_version, const string version_url, const string download_url, const char* process_location = "");
-	~AutoUpdater();
+class AutoUpdater
+	{
+	public:
+		AutoUpdater(Version cur_version, const string version_url, const string download_url, const char* process_location = "");
+		~AutoUpdater();
 
-	int run();
-	
-	int downloadVersionNumber();
-	bool checkForUpdate();
-	int downloadUpdate();
-	int unZipUpdate();
-	int installUpdate();
-	int cleanup();
+		int run();
 
-private:
-	static size_t _WriteCallback(void *contents, size_t size, size_t nmemb, void *userp);
-	static size_t _WriteData(void *ptr, size_t size, size_t nmemb, FILE *stream);
-	void _SetDirs(const char* process_location = "");
-	int _RenameAndCopy(const char* path);
-	void _OutFlags();
+		int downloadVersionNumber();
+		bool checkForUpdate();
+		int downloadUpdate();
+		int unZipUpdate();
+		int installUpdate();
+		int cleanup();
 
-protected:
-	Version *m_version;
-	Version *m_newVersion;
+	private:
+		static size_t _WriteCallback(void *contents, size_t size, size_t nmemb, void *userp);
+		static size_t _WriteData(void *ptr, size_t size, size_t nmemb, FILE *stream);
+		void _SetDirs(const char* process_location = "");
+		int _RenameAndCopy(const char* path);
+		void _OutFlags();
 
-	std::vector<string> *m_pathsToDelete;
-	std::vector<Flag*>	*m_flags;
+	protected:
+		Version * m_version;
+		Version *m_newVersion;
 
-	char m_versionURL[MAX_URL];
-	char m_downloadURL[MAX_URL];
+		std::vector<string> *m_pathsToDelete = nullptr;
+		std::vector<Flag*>	m_flags;
 
-	char m_directory[MAX_PATH];
-	char m_downloadDIR[MAX_PATH];
-	char m_downloadNAME[MAX_FILENAME];
-	char m_downloadFILE[MAX_PATH + MAX_FILENAME];
-	char m_extractedDIR[MAX_PATH];
-	char m_exeLOC[MAX_PATH + MAX_FILENAME];
-};
+		char m_versionURL[MAX_URL];
+		char m_downloadURL[MAX_URL];
+
+		char m_directory[MAX_PATH];
+		char m_downloadDIR[MAX_PATH];
+		char m_downloadNAME[MAX_FILENAME];
+		char m_downloadFILE[MAX_PATH + MAX_FILENAME];
+		char m_extractedDIR[MAX_PATH];
+		char m_exeLOC[MAX_PATH + MAX_FILENAME];
+	};
 
